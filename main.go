@@ -3,6 +3,7 @@ package main
 import (
 	"go-todo-rest-api/config"
 	"go-todo-rest-api/database"
+	"go-todo-rest-api/handler"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -26,10 +27,11 @@ func main() {
 	defer pool.Close()
 	var router *gin.Engine = gin.Default()
 	router.SetTrustedProxies(nil)
-
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{"hello": "world guys "})
-	})
+	//
+	//router.GET("/", func(c *gin.Context) {
+	//	c.JSON(200, gin.H{"hello": "world guys "})
+	//})
+	router.POST("/todos", handler.CreateTodoHandler(pool))
 
 	router.Run(":" + cfg.Port)
 
