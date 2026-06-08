@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"go-todo-rest-api/models"
 	"time"
 
@@ -24,7 +25,7 @@ func CreateTodo(pool *pgxpool.Pool, title string, completed bool) (*models.Todo,
 	return &todo, nil
 }
 
-func GetTodo(pool *pgxpool.Pool) ([]models.Todo, error) {
+func GetTodos(pool *pgxpool.Pool) ([]models.Todo, error) {
 	var ctx context.Context
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
@@ -35,12 +36,13 @@ func GetTodo(pool *pgxpool.Pool) ([]models.Todo, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Print(rows)
 
 	defer rows.Close()
 	var todos []models.Todo
 	for rows.Next() {
 		var todo models.Todo
-		err = rows.Scan(&todo.ID, &todo.Title, &todo.CreatedAt, &todo.CreatedAt, &todo.UpdatedAt)
+		err = rows.Scan(&todo.ID, &todo.Title, &todo.Completed, &todo.CreatedAt, &todo.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -50,5 +52,22 @@ func GetTodo(pool *pgxpool.Pool) ([]models.Todo, error) {
 		return nil, err
 	}
 	return todos, nil
+
+}
+
+func GetTodoById(pool *pgxpool.Pool, id int) (*models.Todo, error) {
+	var ctx context.Context
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var query string = `SELECT id,title,completed,created_at from todos WHERE id = $1`
+	var todo models.Todo
+	var err = pool.QueryRow(ctx, query, id).Scan(&todo.ID, &todo.Title, &todo.Completed, &todo.CreatedAt, &todo.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todo, err
 
 }

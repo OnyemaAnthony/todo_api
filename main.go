@@ -32,6 +32,7 @@ func main() {
 	//	c.JSON(200, gin.H{"hello": "world guys "})
 	//})
 	router.POST("/todos", handler.CreateTodoHandler(pool))
+	router.GET("/todos", handler.GetTodosHandler(pool))
 
 	router.Run(":" + cfg.Port)
 
