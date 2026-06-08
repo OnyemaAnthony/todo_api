@@ -31,10 +31,9 @@ func CreateTodoHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 
 	}
 
-	func GetTodoHandler(pool *pgxpool.Pool) gin.HandlerFunc{
-		return func(c *gin.Context) {
+}
+func GetTodoHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
 
-			 
-	}
 	}
 }
