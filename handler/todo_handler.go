@@ -14,6 +14,10 @@ type createTodoInput struct {
 	Title     string `json:"title" binding:"required"`
 	Completed bool   `json:"completed"`
 }
+type updateTodoInput struct {
+	Title     string `json:"title"`
+	Completed *bool  `json:"completed"`
+}
 
 func CreateTodoHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 
@@ -60,5 +64,36 @@ func GetTodoByIdHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 		}
 		c.JSON(http.StatusOK, todo)
 
+	}
+}
+
+func UpdateTodoHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		var input updateTodoInput
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if input.Title == "" && input.Completed == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "At least either title or completed is required"})
+		}
+
+		var completed bool
+		if input.Completed != nil {
+			completed = *input.Completed
+		}
+		todo, err := repository.UpdateTodo(pool, id, input.Title, completed)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, todo)
 	}
 }
